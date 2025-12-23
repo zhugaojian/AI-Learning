@@ -1,0 +1,14 @@
+{
+  "newuser": {
+    "password_hash": "8bf729f5f3e2ba07cb421f6046e008ef4958665133b14fded2c7271c4664525f",
+    "is_locked": false,
+    "lock_until": null,
+    "failed_attempts": 0
+  },
+  "demo_user": {
+    "password_hash": "32d5f9c281a2cfc1f3733e3aca2bad1f7d46c152aa8851f967c53539d301abdb",
+    "is_locked": false,
+    "lock_until": null,
+    "failed_attempts": 0
+  }
+}
