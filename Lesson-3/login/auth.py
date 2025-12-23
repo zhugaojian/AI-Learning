@@ -38,6 +38,38 @@ class AuthSystem:
         """密码哈希处理"""
         return hashlib.sha256(password.encode()).hexdigest()
     
+    def _is_password_valid(self, password: str) -> Tuple[bool, str]:
+        """
+        检查密码复杂度是否符合要求
+        
+        要求：
+        1. 密码长度不小于8位，不大于16位
+        2. 必须包含大写字母、小写字母、数字、特殊符号中的三种
+        
+        Args:
+            password: 待检查的密码
+            
+        Returns:
+            (是否符合要求, 错误消息)
+        """
+        # 检查密码长度
+        if not (8 <= len(password) <= 16):
+            return False, "密码长度必须在8-16位之间"
+        
+        # 检查字符类型
+        has_upper = any(c.isupper() for c in password)
+        has_lower = any(c.islower() for c in password)
+        has_digit = any(c.isdigit() for c in password)
+        has_special = any(not c.isalnum() for c in password)
+        
+        # 统计符合条件的字符类型数量
+        valid_types = sum([has_upper, has_lower, has_digit, has_special])
+        
+        if valid_types < 3:
+            return False, "密码必须包含大写字母、小写字母、数字、特殊符号中的三种"
+        
+        return True, "密码复杂度符合要求"
+    
     def load_users(self):
         """从文件加载用户数据"""
         if os.path.exists(self.storage_file):
@@ -76,9 +108,9 @@ class AuthSystem:
     def _create_default_users(self):
         """创建默认用户（仅用于演示）"""
         default_users = {
-            'admin': 'admin123',
-            'user1': 'password1',
-            'user2': 'password2'
+            'admin': 'Admin123!',
+            'user1': 'Password1!',
+            'user2': 'Password2!'
         }
         
         for username, password in default_users.items():
@@ -110,8 +142,10 @@ class AuthSystem:
         if len(username) < 3:
             return False, "用户名至少需要3个字符"
         
-        if len(password) < 6:
-            return False, "密码至少需要6个字符"
+        # 检查密码复杂度
+        is_valid, message = self._is_password_valid(password)
+        if not is_valid:
+            return False, message
         
         password_hash = self._hash_password(password)
         self.users[username] = UserAccount(
@@ -256,10 +290,10 @@ if __name__ == "__main__":
     
     # 测试登录
     print("测试登录:")
-    print(auth.login("admin", "admin123"))  # 应该成功
+    print(auth.login("admin", "Admin123!"))  # 应该成功
     print(auth.login("admin", "wrongpass"))  # 应该失败
     
     # 注册新用户
     print("\n测试注册:")
-    print(auth.register_user("newuser", "newpass123"))
-    print(auth.login("newuser", "newpass123"))
+    print(auth.register_user("newuser", "Newpass123!"))
+    print(auth.login("newuser", "Newpass123!"))

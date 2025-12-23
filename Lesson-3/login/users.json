@@ -1,12 +1,30 @@
 {
+  "admin": {
+    "password_hash": "3eb3fe66b31e3b4d10fa70b5cad49c7112294af6ae4e476a1c405155d45aa121",
+    "is_locked": false,
+    "lock_until": null,
+    "failed_attempts": 1
+  },
+  "user1": {
+    "password_hash": "1d707811988069ca760826861d6d63a10e8c3b7f171c4441a6472ea58c11711b",
+    "is_locked": false,
+    "lock_until": null,
+    "failed_attempts": 0
+  },
+  "user2": {
+    "password_hash": "330eb31d7ecbf6cc920672905670a78adac5c44fc0d1cf369aec8f5a5d8ea756",
+    "is_locked": false,
+    "lock_until": null,
+    "failed_attempts": 0
+  },
   "newuser": {
-    "password_hash": "8bf729f5f3e2ba07cb421f6046e008ef4958665133b14fded2c7271c4664525f",
+    "password_hash": "b0d45294be199f4bd477cd152dc2f631bfceab970a7b0ff5b9d9510b67437bbb",
     "is_locked": false,
     "lock_until": null,
     "failed_attempts": 0
   },
   "demo_user": {
-    "password_hash": "32d5f9c281a2cfc1f3733e3aca2bad1f7d46c152aa8851f967c53539d301abdb",
+    "password_hash": "b22f213ec710f0b0e86297d10279d69171f50f01a04edf40f472a563e7ad8576",
     "is_locked": false,
     "lock_until": null,
     "failed_attempts": 0

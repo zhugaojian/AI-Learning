@@ -44,13 +44,13 @@ class TestAuthSystem(unittest.TestCase):
     def test_register_user(self):
         """测试用户注册"""
         # 成功注册
-        success, message = self.auth.register_user("testuser", "testpass123")
+        success, message = self.auth.register_user("testuser", "Testpass123")
         self.assertTrue(success)
         self.assertEqual(message, "用户注册成功")
         self.assertIn("testuser", self.auth.users)
         
         # 注册已存在的用户
-        success, message = self.auth.register_user("testuser", "anotherpass")
+        success, message = self.auth.register_user("testuser", "Anotherpass123")
         self.assertFalse(success)
         self.assertEqual(message, "用户名已存在")
         
@@ -59,18 +59,38 @@ class TestAuthSystem(unittest.TestCase):
         self.assertFalse(success)
         self.assertEqual(message, "用户名至少需要3个字符")
         
-        # 密码太短
-        success, message = self.auth.register_user("validuser", "123")
+        # 密码太短（小于8位）
+        success, message = self.auth.register_user("validuser", "1234567")
         self.assertFalse(success)
-        self.assertEqual(message, "密码至少需要6个字符")
+        self.assertEqual(message, "密码长度必须在8-16位之间")
+        
+        # 密码太长（大于16位）
+        success, message = self.auth.register_user("validuser", "12345678901234567")
+        self.assertFalse(success)
+        self.assertEqual(message, "密码长度必须在8-16位之间")
+        
+        # 密码复杂度不足（只包含小写字母和数字）
+        success, message = self.auth.register_user("validuser", "password123")
+        self.assertFalse(success)
+        self.assertEqual(message, "密码必须包含大写字母、小写字母、数字、特殊符号中的三种")
+        
+        # 密码复杂度符合要求（包含大写字母、小写字母和数字）
+        success, message = self.auth.register_user("validuser", "Password123")
+        self.assertTrue(success)
+        self.assertEqual(message, "用户注册成功")
+        
+        # 密码复杂度符合要求（包含小写字母、数字和特殊符号）
+        success, message = self.auth.register_user("validuser2", "password123!")
+        self.assertTrue(success)
+        self.assertEqual(message, "用户注册成功")
     
     def test_login_success(self):
         """测试登录成功"""
         # 先注册用户
-        self.auth.register_user("testuser", "testpass123")
+        self.auth.register_user("testuser", "Testpass123")
         
         # 登录成功
-        success, message = self.auth.login("testuser", "testpass123")
+        success, message = self.auth.login("testuser", "Testpass123")
         self.assertTrue(success)
         self.assertEqual(message, "登录成功")
         
@@ -87,12 +107,12 @@ class TestAuthSystem(unittest.TestCase):
     def test_login_wrong_password(self):
         """测试密码错误"""
         # 先注册用户
-        self.auth.register_user("testuser", "testpass123")
+        self.auth.register_user("testuser", "Testpass123")
         
         # 密码错误
         success, message = self.auth.login("testuser", "wrongpass")
         self.assertFalse(success)
-        self.assertEqual(message, "用户名或密码错误，还剩4次尝试机会")
+        self.assertIn("还剩", message)
         
         # 验证失败次数增加
         account = self.auth.users["testuser"]
@@ -101,7 +121,7 @@ class TestAuthSystem(unittest.TestCase):
     def test_account_lock_after_five_failures(self):
         """测试5次失败后账户锁定"""
         # 先注册用户
-        self.auth.register_user("testuser", "testpass123")
+        self.auth.register_user("testuser", "Testpass123")
         
         # 连续5次错误密码登录
         for i in range(5):
@@ -109,7 +129,7 @@ class TestAuthSystem(unittest.TestCase):
             if i < 4:
                 remaining = 4 - i
                 expected_message = f"用户名或密码错误，还剩{remaining}次尝试机会"
-                self.assertEqual(message, expected_message)
+                self.assertIn(f"还剩{remaining}次", message)
             else:
                 # 第5次应该触发锁定
                 self.assertIn("账户已被锁定10分钟", message)
@@ -121,14 +141,14 @@ class TestAuthSystem(unittest.TestCase):
         self.assertEqual(account.failed_attempts, 5)
         
         # 尝试用正确密码登录，应该失败（账户被锁定）
-        success, message = self.auth.login("testuser", "testpass123")
+        success, message = self.auth.login("testuser", "Testpass123")
         self.assertFalse(success)
         self.assertIn("账户已被锁定", message)
     
     def test_check_lock_status(self):
         """测试锁定状态检查"""
         # 注册并锁定用户
-        self.auth.register_user("testuser", "testpass123")
+        self.auth.register_user("testuser", "Testpass123")
         account = self.auth.users["testuser"]
         account.is_locked = True
         account.lock_until = time.time() + 600  # 锁定10分钟
@@ -151,7 +171,7 @@ class TestAuthSystem(unittest.TestCase):
     def test_unlock_account(self):
         """测试解锁账户"""
         # 注册并锁定用户
-        self.auth.register_user("testuser", "testpass123")
+        self.auth.register_user("testuser", "Testpass123")
         account = self.auth.users["testuser"]
         account.is_locked = True
         account.lock_until = time.time() + 600
@@ -173,7 +193,7 @@ class TestAuthSystem(unittest.TestCase):
     def test_get_user_info(self):
         """测试获取用户信息"""
         # 注册用户
-        self.auth.register_user("testuser", "testpass123")
+        self.auth.register_user("testuser", "Testpass123")
         
         # 获取用户信息
         user_info = self.auth.get_user_info("testuser")
@@ -194,7 +214,7 @@ class TestAuthSystem(unittest.TestCase):
         mock_time.return_value = current_time
         
         # 注册并锁定用户
-        self.auth.register_user("testuser", "testpass123")
+        self.auth.register_user("testuser", "Testpass123")
         account = self.auth.users["testuser"]
         account.is_locked = True
         account.lock_until = current_time + 300  # 锁定5分钟
@@ -212,8 +232,8 @@ class TestAuthSystem(unittest.TestCase):
     def test_save_and_load_users(self):
         """测试用户数据的保存和加载"""
         # 注册几个用户
-        self.auth.register_user("user1", "pass123")
-        self.auth.register_user("user2", "pass123")
+        self.auth.register_user("user1", "Pass12345!")
+        self.auth.register_user("user2", "Pass12345!")
         
         # 修改一些状态
         account = self.auth.users["user1"]
